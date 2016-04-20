@@ -14,12 +14,14 @@
 		D0B2D5131CC431A200A5B476 /* max7219.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = max7219.h; sourceTree = "<group>"; };
 		D0B2D5141CC431A200A5B476 /* uart0io.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uart0io.c; sourceTree = "<group>"; };
 		D0B2D5151CC431A200A5B476 /* uart0io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uart0io.h; sourceTree = "<group>"; };
+		D0B2D5171CC83F8E00A5B476 /* hardware */ = {isa = PBXFileReference; lastKnownFileType = folder; path = hardware; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		4079523B0CEA382200E202DC = {
 			isa = PBXGroup;
 			children = (
+				D0B2D5171CC83F8E00A5B476 /* hardware */,
 				4079525D0CEA38CC00E202DC /* firmware */,
 			);
 			sourceTree = "<group>";
