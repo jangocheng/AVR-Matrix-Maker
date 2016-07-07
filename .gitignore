@@ -4,6 +4,8 @@
 
 ## Build generated
 build/
+bin/
+obj/
 DerivedData
 
 ## Various settings
