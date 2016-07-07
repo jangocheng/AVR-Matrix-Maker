@@ -1,371 +1,519 @@
+#        1         2         3         4         5         6         7         8
+#2345678901234567890123456789012345678901234567890123456789012345678901234567890
+################################################################################
+#                                                                              #
+#   AVR Project Makefile                                                       #
+#                                                                              #
+#       all                                                                    #
+#       build (default target)                                                 #
+#       flash                                                                  #
+#       serial                                                                 #
+#       clean                                                                  #
+#                                                                              #
+################################################################################
 
-#########  AVR Project Makefile Template   #########
+################################################################################
+#####
+##### PROJECT
+#####
+##### The name of the project used as the build target name
+#####
+#####   -   Allow Xcode to name project from template;
+#####   -   Explicitly configure project name;
+#####   -   Create project name from name of parent directory;
 
-PROJECTNAME = avr-matrix-maker
-PROJECTTYPE = Project
+#PROJECT         = ___PROJECTNAME___
+PROJECT         = avr-matrix-maker
+#PROJECT         = $(lastword $(subst /, ,$(shell cd ..;pwd)))
 
-# TODO rename to SRCS
-PRJSRC = main.c uart0io.c
+################################################################################
+#####
+##### MCU and programmer settings for arduino boards.  See below.
+#####
+##### ARDUINO       -   Configures MCU and avrdude parameters according to the
+#####                   Arduino board being used.  DOES NOT INCLUDE Arduino
+#####                   cores / libraries / etc.  If left blank, individual
+#####                   parameters need to be set.  See arduino.mk file for
+#####                   a list of valid Arduinos that can be used
+#####
+#####   -   Allow Xcode to replace with arduino choosen duing project setup
+#####   -   Explicitly define arduino
 
-INC =
-LIBS =
+#include arduino.mk
 
-USE_MATH_LIB	=
-USE_PRINTF		=
-USE_SCANF		=
+#ARDUINO         = ___VARIABLE_ARDUINO___
+#ARDUINO         = mega2560
 
-#USE_PRINTF_FLT	= true
-#USE_SCANF_FLT	= true
+################################################################################
+#####
+##### The following variables need to be set if not using ARDUINO variable
+#####
+##### MCU           -   Target AVR `avr-as --help` for supported target list
+#####
+##### CLOCK         -   Clock speed of hardware, passed as F_CPU during build
+#####
+##### HFUSE         -   High Fuse bits
+##### LFUSE         -   Low Fuse bits
+##### EFUSE         -   Extended Fuse bits
 
-OPTLEVEL = s
+MCU             = atmega328p
+CLOCK           = 16000000
+#HFUSE           =
+#LFUSE           =
+#EFUSE           =
 
-# Select the Arduino board to be programmed
-ARDUINO = atmega328
+################################################################################
+#####
+##### The following avrdude variables need to be set if not using ARDUINO var
+#####
+##### AVRDUDE_PROGRAMMER    -   programmer used; `avrdude -c\?` for a list
+##### AVRDUDE_PORT          -   port on which programmer is attached
+##### AVRDUDE_BAUD          -   buad rate used for arduino/serial programmers
+##### AVRDUDE_BITCLOCK      -   bitclock for ISP programmers
+#####
 
-# If using bare metal AVR chip, leave above ARDUINO empty and fill in
-# the following vars as needed for your chip and programmer
-#MCU					= atmega328p
-#CLOCK					= 16000000
-#BAUD					= 57600
-#PROGRAMMER_MCU			= m328p
-#AVRDUDE_PROGRAMMERID	= arduino
-#AVRDUDE_PORT			= /dev/tty.usbserial*
+AVRDUDE_PROGRAMMER  =   arduino
+AVRDUDE_PORT        =	/dev/tty.usb*
+#AVRDUDE_BITCLOCK    =   1
+AVRDUDE_BAUD        =   57600
 
-###############################################################################
-#																			
-# Arduino Types
-#
-# These types of Arduinos are pulled from boards.txt
-# from the Arduino software environment.
-#
-# uno			- Uno							Atmega328
-# atmega328		- Duemilanove					ATmega328
-# diecimila		- Diecimila or Duemilanove		ATmega168
-# nano328		- Nano							ATmega328
-# nano			- Nano							ATmega168
-# mega2560		- Mega 2560 or Mega ADK			ATmega2560
-# mega			- Mega 							ATmega1280
-# leonardo		- Leonardo						ATmega32u4
-# mini328		- Mini							ATmega328
-# mini			- Mini							ATmega168
-# ethernet		- Ethernet						ATmega328
-# fio			- Fio							ATmega328
-# bt328			- BT							ATmega328
-# bt			- BT							ATmega168
-# lilypad328	- LilyPad						ATmega328
-# lilypad		- LilyPad						ATmega168
-# pro5v328		- Pro or Pro Mini (5V, 16 Mhz)	ATmega328
-# pro5v			- Pro or Pro Mini (5V, 16 MHz)	ATmega168
-# pro328		- Pro or Pro Mini (3.3V, 8 MHz)	ATmega328
-# pro			- Pro or Pro Mini (3.3V, 8 MHz)	ATmega168
-# atmega168		- Arduino NG or older			ATmega168
-# atmega8		- Arduino NG or older			ATmega8
-#
-###############################################################################
+################################################################################
+#####
+##### Serial Console
+#####
+##### SERIAL_PORT       -	Port used for serial comms, usualy the same
+#####                       port as the arduino / avrdude port
+#####
+##### SERIAL_BAUD       -	Baud rate used for serial comms
 
-#####         Target Specific Details          #####
-#####     Customize these for your project     #####
-
-
-ifeq ($(ARDUINO), uno)
-	MCU						= atmega328p
-	CLOCK					= 16000000
-	BAUD					= 115200
-	PROGRAMMER_MCU			= m328p
-	AVRDUDE_PROGRAMMERID	= arduino
-	AVRDUDE_PORT			= /dev/tty.usbmodem*
-endif
-
-ifeq ($(ARDUINO), atmega328)
-	MCU						= atmega328p
-	CLOCK					= 16000000
-	BAUD					= 57600
-	PROGRAMMER_MCU			= m328p
-	AVRDUDE_PROGRAMMERID	= arduino
-	AVRDUDE_PORT			= /dev/tty.usbserial*
-endif
-
-ifeq ($(ARDUINO), diecimila)
-	MCU						= atmega168
-	CLOCK					= 16000000
-	BAUD					= 19200
-	PROGRAMMER_MCU			= m168
-	AVRDUDE_PROGRAMMERID	= arduino
-	AVRDUDE_PORT			= /dev/tty.usbserial*
-endif
-
-ifeq ($(ARDUINO), nano328)
-	MCU						= atmega328p
-	CLOCK					= 16000000
-	BAUD					= 57600
-	PROGRAMMER_MCU			= m328p
-	AVRDUDE_PROGRAMMERID	= arduino
-	AVRDUDE_PORT			= /dev/tty.usbserial*
-endif
-
-# nano (ATmega168)
-
-ifeq ($(ARDUINO), mega2560)
-	MCU						= atmega2560
-	CLOCK					= 16000000
-	BAUD					= 115200
-	PROGRAMMER_MCU			= m2560
-	AVRDUDE_PROGRAMMERID	= stk500v2
-	AVRDUDE_PORT			= /dev/tty.usbmodem*
-endif
-
-ifeq ($(ARDUINO), mega)
-	MCU						= atmega1280
-	CLOCK					= 16000000
-	BAUD					= 57600
-	PROGRAMMER_MCU			= m1280
-	AVRDUDE_PROGRAMMERID	= arduino
-	AVRDUDE_PORT			= /dev/tty.usbserial*
-endif
-
-# AVR fuse calculator
-# http://www.engbedded.com/fusecalc/
-# Specify fuses
-FUSES = -U hfuse:w:0x11:m -U lfuse:w:0xE4:m 
+SERIAL_PORT         =   $(AVRDUDE_PORT)
+SERIAL_BAUD         =   230400
 
 
+################################################################################
+#####
+##### EXTRAINCS     -   Add any directories which contain include files not
+#####                   not found in the standard locations.  This is a
+#####                   list of directories separated by spaces,  directories
+#####                   which contain spaces in their name need to be quoted.
+#####                   These are added with the -I argument.
+#####
+##### EXTRALIBS     -   Any libraries that need to be linked in.  This is a
+#####                   space separated list which will be expanded as -lname
+#####
+##### EXTRALIBDIRS  -   Non-standard directories where libraries in EXTRALIBS
+#####                   can be found.  This is a list of directories separated
+#####                   by spaces,  directories which contain spaces in their
+#####                   name need to be quoted.  These are added with the -L
+#####                   argument.
+#####
+##### EXTRASRCDIRS  -   Space separated list of directories to seach for any
+#####                   source files not found in the project src/ directory.
+#####                   Directories which contain spaces in ther name need to
+#####                   be quoted.
+
+EXTRAINCDIRS    =   
+EXTRALIBS       =
+EXTRALIBDIRS    =
+EXTRASRCDIRS    =   
+
+################################################################################
+#####
+##### USE_MATH_LIB      -   if defined will link project with math library (-lm)
+#####
+##### USE_PRINTF_LIB    = standard  - uses standard printf lib
+#####                   = min       - uses minimal printf lib
+#####                   = float     - uses floating point printf lib
+#####
+##### USE_SCANF_LIB     - same options as USE_PRINTF_LIB
+
+#USE_MATH_LIB    = true
+#USE_PRINTF_LIB  = min
+#USE_SCANF_LIB   = float
+
+################################################################################
+#####
+##### EXTRADEFS     -   Extra -D defines
+##### EXTRACFLAGS   -   Extra flags passed to C compiler
+##### EXTRACXXFLAGS -   Extra flags passed to C++ compiler
+##### EXTRAASMFLAGS -   Extra flags passed to assembler
+##### EXTRACPPFLAGS -   Extra flags passed to pre-processor
+##### EXTRALDFLAGS  -   Extra flags passed to linker
+
+EXTRADEFS       =
+EXTRACFLAGS     =
+EXTRACXXFLAGS   =
+EXTRAASMFLAGS   =
+EXTRACPPFLAGS   =
+EXTRALDFLAGS    =
+
+################################################################################
+#####
+##### HEXFORMAT     - format for .hex file output: ihex, binary, srec
+
+HEXFORMAT       = ihex
+
+################################################################################
+#####
+##### Optimization level, can be [0, 1, 2, 3, s].
+#####     0 = turn off optimization. s = optimize for size.
+#####     (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
+
+OPTLEVEL        = s
+
+################################################################################
+#####
+##### Debugging format.
+#####     Native formats for AVR-GCC's -g are dwarf-2 [default] or stabs.
+#####     AVR [Extended] COFF format requires stabs, plus an avr-objcopy run.
+
+DEBUG           = stabs
+
+################################################################################
+#                                                                              #
+#                           CONFIG FINISHED                                    #
+#                                                                              #
+# There is generally nothing else that needs to be edited below unless there   #
+# are some local changes to be made.                                           #
+#                                                                              #
+################################################################################
+
+################################################################################
+#####
+#####   Text Strings
+
+TEXT_DASH_LINE = \
+--------------------------------------------------------------------------------
+
+################################################################################
+#####
+#####   Project Directories
+#####
+#####   BUILDDIR    -   Location of build files (.s, .lss, .lst)
+#####   BINDIR      -   Location of final output (.elf, .hex, .ee.hex, .eep)
+#####   OBJDIR      -   locaiton of compiled object files (.o)
+#####   INCDIR      -   locaiton of include files
+#####   SRCDIR      -   location of source files (.c, .cpp, .cc, .C, .S)
+
+BUILDDIR        = build
+BINDIR          = bin
+OBJDIR          = obj
+#INCDIR          = include
+#SRCDIR          = src
+
+################################################################################
+#####
+#####   Executables
+
+CC              = avr-gcc
+OBJCOPY         = avr-objcopy
+OBJDUMP         = avr-objdump
+SIZE            = avr-size
+NM              = avr-nm
+AVRDUDE         = avrdude
+REMOVE          = rm -f
+MKDIR           = mkdir -p
+KILL 			= kill
+
+################################################################################
+#####
+#####   Include and Library directories
+
+INCS            = -I. 
+#INCS           += -I$(INCDIR)
+INCS           += $(patsubst %,-I%,$(EXTRAINCDIRS))
+
+LIBDIRS         = $(patsubst %,-L%,$(EXTRALIBDIRS))
+LIBS            = $(patsubst %,-l%,$(EXTRALIBS))
+
+DEFS            = $(patsubst %,-D%,$(EXTRADEFS))
 
 
+################################################################################
+#####
+#####   Target / Source / Object / Build / Bin Files
 
-####################################################
-#####                Config Done               #####
-#####                                          #####
-##### You shouldn't need to edit anything      #####
-##### below to use the makefile but may wish   #####
-##### to override a few of the flags           #####
-##### nonetheless                              #####
-#####                                          #####
-####################################################
+TARGET          = $(PROJECT)
+VPATH           = $(EXTRASRCDIRS)
+
+CSRCS           = $(wildcard *.c)
+CSRCS          += $(foreach dir, $(EXTRASRCDIRS), $(wildcard $(dir)/*.c))
+
+#CXXSRCS      =  $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/.cc)
+
+OBJFILES        = $(addprefix obj/, $(notdir $(CSRCS:.c=.o)))
+
+LSTFILES        =  $(OBJFILES:$(OBJDIR)/%.o=$(BUILDDIR)/%.lst)
+
+################################################################################
+#####
+#####   printf / scanf and math lib options
 
 printf_min	= -Wl,-u,vfprintf -lprintf_min
-printf_flt	= -Wl,-u,vfprintf -lprintf_flt -lm
+printf_flt	= -Wl,-u,vfprintf -lprintf_flt
 
-scanf_min	= -Wl,-u,vfscanf -lscanf_flt -lm
-scanf_flt	= -Wl,-u,vfscanf -lscanf_min -lm
+scanf_min	= -Wl,-u,vfscanf -lscanf_min
+scanf_flt	= -Wl,-u,vfscanf -lscanf_flt
 
 math_lib	= -lm
 
-##### Flags #####
+ifneq ($(USE_PRINTF_LIB), standard)
+    ifeq ($(USE_PRINTF_LIB), min)
+        LIBS += $(printf_min)
+    else ifeq ($(USE_PRINTF_LIB), float)
+        LIBS += $(printf_flt)
+        USE_MATH_LIB = true
+    endif
+endif
+
+ifneq ($(USE_SCANF_LIB), standard)
+    ifeq ($(USE_SCANF_LIB), min)
+        LIBS += $(scanf_min)
+    else ifeq ($(USE_SCANF_LIB), float)
+        LIBS += $(scanf_flt)
+        USE_MATH_LIB = true
+    endif
+endif
 
 ifeq ($(USE_MATH_LIB), true)
-	LIBS += $(math_lib)
+    LIBS += $(math_lib)
 endif
 
-ifeq ($(USE_PRINTF), true)
-	ifeq ($(USE_PRINTF_FLT), true)
-		LIBS += $(printf_flt)
-	else
-		LIBS += $(printf_min)
-	endif
-endif
+################################################################################
+#####
+#####   AVR Options
 
-ifeq ($(USE_SCANF), true)
-	ifeq ($(USE_SCAN_FLT), true)
-		LIBS += $(scanf_flt)
-	else
-		LIBS += $(scanf_min)
-	endif
-endif
+AVRFLAGS    =   -mmcu=$(MCU)
 
-# HEXFORMAT -- format for .hex file output
-HEXFORMAT=ihex
+################################################################################
+#####
+#####   Pre Processor flags
 
-# compiler
-CFLAGS	= -DF_CPU=$(CLOCK)
-CFLAGS += -I. $(INC) 
-CFLAGS += -g -mmcu=$(MCU)
-CFLAGS += -O$(OPTLEVEL)
-CFLAGS += -fpack-struct
-CFLAGS += -fshort-enums
-CFLAGS += -funsigned-bitfields
-CFLAGS += -funsigned-char
-CFLAGS += -Wall -Wstrict-prototypes
-CFLAGS += -Wa,-ahlms=$(firstword $(filter %.lst, $(<:.c=.lst)))
+CPPFLAGS     =  -DF_CPU=$(CLOCK)
+CPPFLAGS   	+=  $(DEFS)
+CPPFLAGS    +=  $(INCS)
 
-# c++ specific flags
-CPPFLAGS	= -DF_CPU=$(CLOCK)
-CPPFLAGS   += -fno-exceptions
-CPPFLAGS   += -Wa,-ahlms=$(firstword \
-	$(filter %.lst, $(<:.cpp=.lst))  \
-	$(filter %.lst, $(<:.cc=.lst))   \
-	$(filter %.lst, $(<:.C=.lst)))
+################################################################################
+#####
+#####   C compiler flags
 
-# assembler
-ASMFLAGS	=-I. $(INC)
-ASMFLAGS   += -mmcu=$(MCU)
-ASMFLAGS   += -DF_CPU=$(CLOCK)
-ASMFLAGS   += -x assembler-with-cpp
-ASMFLAGS   += -Wa,-gstabs,-ahlms=$(firstword $(<:.S=.lst) $(<.s=.lst))
+CFLAGS       = -g$(DEBUG)
+CFLAGS      += -O$(OPTLEVEL)
+CFLAGS      += -fpack-struct
+CFLAGS      += -fshort-enums
+CFLAGS      += -funsigned-bitfields
+CFLAGS      += -funsigned-char
+CFLAGS      += -ffunction-sections
+CFLAGS      += -fdata-sections
+CFLAGS      += -Wall
+CFLAGS      += -Wstrict-prototypes
+CFLAGS      += -Wa,-adhlns=$(addprefix build/, $(notdir $(<:.c=.lst)))
+CFLAGS      += -std=gnu99
 
+################################################################################
+#####
+#####   C++ compiler flags
 
-# linker
-LDFLAGS		=-Wl,-Map,$(TRG).map
-LDFLAGS	   += -mmcu=$(MCU)
+#CXXFLAGS    =   -fno-exceptions
+#CXXFLAGS   +=   -Wa,-ahlms=$(firstword \
+#    $(filter %.lst, $(<:.cpp=.lst))  \
+#    $(filter %.lst, $(<:.cc=.lst))   \
+#    $(filter %.lst, $(<:.C=.lst)))
+
+################################################################################
+#####
+#####   Linker flags
+
+LDFLAGS	    = -Wl,-Map,$(BUILDDIR)/$(TARGET).map
+LDLAGSS    += -Wl,--relax -mcall-prologues
+LDFLAGS    += -Wl,--gc-sections
 LDFLAGS	   += $(LIBS)
-	
+LDFLAGS    += $(LIBDIRS)
 
-##### executables ####
-CC		= avr-gcc
-OBJCOPY	= avr-objcopy
-OBJDUMP	= avr-objdump
-SIZE	= avr-size
-AVRDUDE	= avrdude
-REMOVE	= rm -f
+################################################################################
+#####
+#####   avrdude flags
 
-##### automatic target names ####
-TRG=$(PROJECTNAME).out
-DUMPTRG=$(PROJECTNAME).s
+ifeq ($(dir $(AVRDUDE_PORT)),/dev/)
+    AVRDUDE_DEVICE_FILE = true
+    AVRDUDE_PORT_LIST   = $(wildcard $(AVRDUDE_PORT))
+    AVRDUDE_ACTIVE_PORT = $(firstword $(AVRDUDE_PORT_LIST))
+else
+    AVRDUDE_ACTIVE_PORT = $(AVRDUDE_PORT)
+endif
 
-HEXROMTRG=$(PROJECTNAME).hex 
-HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
-GDBINITFILE=gdbinit-$(PROJECTNAME)
+AVRDUDEFLAGS     =  -c $(AVRDUDE_PROGRAMMER)
+AVRDUDEFLAGS    +=  $(patsubst %,-P %,$(AVRDUDE_ACTIVE_PORT))
+AVRDUDEFLAGS    +=  $(patsubst %,-b %,$(AVRDUDE_BAUD))
+AVRDUDEFLAGS    +=  $(patsubst %,-B %,$(AVRDUDE_BITCLOCK))
+AVRDUDEFLAGS    +=  -p $(MCU)
 
-# Define all object files.
+AVRDUDE_FLASH   =   -U flash:w:$(BINDIR)/$(TARGET).hex
+AVRDUDE_EEPROM  =
+AVRDUDE_FUSES   =   -U hfuse:w:$(HFUSE):m \
+                    -U lfuse:w:$(LFUSE):m \
+                    -U efuse:w:$(EFUSE):m
 
-# Start by splitting source files by type
-#  C++
-CPPFILES	= $(filter %.cpp, $(PRJSRC))
-CCFILES		= $(filter %.cc, $(PRJSRC))
-BIGCFILES	= $(filter %.C, $(PRJSRC))
+ifeq ($(MAKECMDGOALS),all)
+    FLASH_GOAL = true
+endif
+ifeq ($(MAKECMDGOALS),flash)
+    FLASH_GOAL = true
+endif
 
-#  C
-CFILES		= $(filter %.c, $(PRJSRC))
+ifeq ($(FLASH_GOAL),true)
+    ifeq ($(AVRDUDE_DEVICE_FILE), true)
+        ifeq ($(words $(AVRDUDE_PORT_LIST)), 0)
+            $(error "AVRDUDE_PORT: $(AVRDUDE_PORT) Not Found **********")
+        else ifneq ($(words $(AVRDUDE_PORT_LIST)), 1)
+            $(info )
+            $(info $(TEXT_DASH_LINE))
+            $(info )
+            $(info Found multiple avrdude ports:)
+            $(info $(AVRDUDE_PORT_LIST))
+            $(info Explicitly select a port for AVRDUDE_PORT)
+            $(info )
+            $(info $(TEXT_DASH_LINE))
+            $(info )
+            $(error "Found multiple avrdude ports! **********")
+        endif
+    endif
+endif
 
-#  Assembly
-ASMFILES	= $(filter %.S, $(PRJSRC))
+################################################################################
+#####
+#####   Serial Console
+
+SERIAL_PORT_LIST    = $(wildcard $(SERIAL_PORT))
+SERIAL_ACTIVE_PORT  = $(firstword $(SERIAL_PORT_LIST))
+SERIAL_CMD          = minicom -D $(SERIAL_ACTIVE_PORT) -b $(SERIAL_BAUD)
+SERIAL_CMD_FILE     = /tmp/serial_console.command
+SERIAL_PID_FILE     = /tmp/serial_console.pid
+SERIAL_PID          = $(shell cat $(SERIAL_PID_FILE))
+SERIAL_LOCK         = /tmp/LCK..$(notdir $(SERIAL_PORT))
+SERIAL_ACTIVE_LOCK  = $(wildcard $(SERIAL_LOCK))
+SERIAL_ACTIVE_PID   = $(strip $(shell cat $(SERIAL_ACTIVE_LOCK)))
+SERIAL_WARNING      = \
+    echo '\#warning ********** Found multiple serial ports **********' | \
+    $(CC) -o /dev/null -xc -;
+
+ifeq ($(MAKECMDGOALS),all)
+    SERIAL_GOAL = true
+endif
+ifeq ($(MAKECMDGOALS),serial)
+    SERIAL_GOAL = true
+endif
+
+ifeq ($(SERIAL_GOAL),true)
+    ifeq ($(words $(SERIAL_PORT_LIST)), 0)
+        $(error "SERIAL_PORT: $(SERIAL_PORT) Not Found! *********")
+    else ifneq ($(words $(SERIAL_PORT_LIST)), 1)
+        $(shell $(SERIAL_WARNING))
+        $(info $(TEXT_DASH_LINE))
+        $(info Found multiple serial ports:)
+        $(info $(SERIAL_PORT_LIST))
+        $(info Using: $(SERIAL_ACTIVE_PORT))
+        $(info $(TEXT_DASH_LINE))
+    endif
+endif
+
+################################################################################
+#####
+#####   Rules
 
 
-# List all object files we need to create
-OBJDEPS		= $(CFILES:.c=.o)
-OBJDEPS	   += $(CPPFILES:.cpp=.o)
-OBJDEPS	   += $(BIGCFILES:.C=.o)
-OBJDEPS	   += $(CCFILES:.cc=.o)
-OBJDEPS    += $(ASMFILES:.S=.o)
+.PHONEY:    all build elf hex eep lss sym clean flash outdirs serial \
+            closeserial outdirs
 
-# Define all lst files.
-LST	= $(filter %.lst, $(OBJDEPS:.o=.lst))
+build: outdirs elf hex lss sym
 
-# All the possible generated assembly 
-# files (.s files)
-GENASMFILES	= $(filter %.s, $(OBJDEPS:.o=.s)) 
+all: build flash serial
 
+outdirs:
+	@$(MKDIR) $(BINDIR)
+	@$(MKDIR) $(OBJDIR)
+	@$(MKDIR) $(BUILDDIR)
 
-.SUFFIXES : .c .cc .cpp .C .o .out .s .S \
-	.hex .ee.hex .h .hh .hpp
+eeprom: eep
 
+elf:    $(BINDIR)/$(TARGET).elf
+hex:    $(BINDIR)/$(TARGET).hex
+eep:    $(BINDIR)/$(TARGET).eep
+lss:    $(BINDIR)/$(TARGET).lss
+sym:    $(BINDIR)/$(TARGET).sym
 
-.PHONY: writeflash clean stats gdbinit
+################################################################################
+#####
+#####   Build rules
 
-# Make targets:
-# all, disasm, stats, hex, writeflash/install, writefuse, gdbinit, clean
-all: $(TRG)
-
-disasm: $(DUMPTRG) stats
-
-stats: $(TRG)
-	$(OBJDUMP) -h $(TRG)
-	$(SIZE) $(TRG) 
-
-hex: $(HEXTRG)
-
-
-writeflash: hex
-	$(AVRDUDE) -c $(AVRDUDE_PROGRAMMERID)   \
-	 -p $(PROGRAMMER_MCU) -P $(AVRDUDE_PORT) -e -b $(BAUD) -D       \
-	 -U flash:w:$(HEXROMTRG)
-
-install: writeflash
-
-writefuse:
-	$(AVRDUDE) -c $(AVRDUDE_PROGRAMMERID)   \
-	 -p $(PROGRAMMER_MCU) -P $(AVRDUDE_PORT)        \
-	 $(FUSES)
-
-$(DUMPTRG): $(TRG) 
-	$(OBJDUMP) -S  $< > $@
-
-
-$(TRG): $(OBJDEPS) 
-	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS)
-
-
-#### Generating assembly ####
-# asm from C
+# asm from C files
 %.s: %.c
-	$(CC) -S $(CFLAGS) $< -o $@
+	$(CC) -S $(CPPFLAGS) $(CFLAGS) $(AVRFLAGS) $< -o $(BUILDDIR)/$@
 
-# asm from (hand coded) asm
-%.s: %.S
-	$(CC) -S $(ASMFLAGS) $< > $@
+# Compile object files from C source files
+$(OBJDIR)/%.o : %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(AVRFLAGS) -c "$(abspath $<)" -o $@
 
+# Link object files to create .elf file
+$(BINDIR)/$(TARGET).elf : $(OBJFILES)
+	$(CC) $(LDFLAGS) $(AVRFLAGS) -o $@ $(OBJFILES)
 
-# asm from C++
-.cpp.s .cc.s .C.s :
-	$(CC) -S $(CFLAGS) $(CPPFLAGS) $< -o $@
+# Make hex file from elf output
+$(BINDIR)/%.hex: $(BINDIR)/%.elf
+	$(OBJCOPY) -j .text -j .data -O $(HEXFORMAT) $< $@
 
+# Make hex file for eeprom from elf output
+$(BINDIR)/%.eep: $(BINDIR)/%.elf
+	-$(OBJCOPY) -j .eeprom --set-section-flags .eeprom=alloc,load \
+        --change-section-lma .eeprom=0 -O $(HEXFORMAT) $< $@
 
+$(BINDIR)/%.lss: $(BINDIR)/%.elf
+	$(OBJDUMP) -h -S $< > $@
 
-#### Generating object files ####
-# object from C
-.c.o: 
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BINDIR)/%.sym: $(BINDIR)/%.elf
+	$(NM) -n $< > $@
 
+################################################################################
+#####
+#####   Write Flash rules
 
-# object from C++ (.cc, .cpp, .C files)
-.cc.o .cpp.o .C.o :
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+flash: build closeserial
 
-# object from asm
-.S.o :
-	$(CC) $(ASMFLAGS) -c $< -o $@
+	$(AVRDUDE) $(AVRDUDEFLAGS) $(AVRDUDE_FLASH)
 
+################################################################################
+#####
+#####   Serial Console rules
 
-#### Generating hex files ####
-# hex files from elf
-#####  Generating a gdb initialisation file    #####
-.out.hex:
-	$(OBJCOPY) -j .text                    \
-		-j .data                       \
-		-O $(HEXFORMAT) $< $@
+serial: closeserial
 
-.out.ee.hex:
-	$(OBJCOPY) -j .eeprom                  \
-		--change-section-lma .eeprom=0 \
-		-O $(HEXFORMAT) $< $@
+	@echo "Starting Serial Console on port $(SERIAL_ACTIVE_PORT)"
+	@echo '#!/bin/sh' > $(SERIAL_CMD_FILE); \
+	echo 'echo $$$$> $(SERIAL_PID_FILE) && exec $(SERIAL_CMD)' \
+		>> $(SERIAL_CMD_FILE) ;\
+	chmod +x $(SERIAL_CMD_FILE); \
+	open $(SERIAL_CMD_FILE);
 
+closeserial:
 
-#####  Generating a gdb initialisation file    #####
-##### Use by launching simulavr and avr-gdb:   #####
-#####   avr-gdb -x gdbinit-myproject           #####
-gdbinit: $(GDBINITFILE)
+ifneq ($(SERIAL_ACTIVE_LOCK),)
+    ifeq ($(SERIAL_ACTIVE_PID), $(SERIAL_PID))
+		@echo "Killing serial console, waiting 5 seconds"; \
+		kill $(SERIAL_ACTIVE_PID); \
+		sleep 5;  \
+		$(RM) $(SERIAL_PID_FILE); \
+		$(RM) $(SERIAL_CMD_FILE);
+    endif
+endif
 
-$(GDBINITFILE): $(TRG)
-	@echo "file $(TRG)" > $(GDBINITFILE)
-	
-	@echo "target remote localhost:1212" \
-		                >> $(GDBINITFILE)
-	
-	@echo "load"        >> $(GDBINITFILE) 
-	@echo "break main"  >> $(GDBINITFILE)
-	@echo "continue"    >> $(GDBINITFILE)
-	@echo
-	@echo "Use 'avr-gdb -x $(GDBINITFILE)'"
+################################################################################
+#####
+#####   Clean rule
 
-
-#### Cleanup ####
 clean:
-	$(REMOVE) $(TRG) $(TRG).map $(DUMPTRG)
-	$(REMOVE) $(OBJDEPS)
-	$(REMOVE) $(LST) $(GDBINITFILE)
-	$(REMOVE) $(GENASMFILES)
-	$(REMOVE) $(HEXTRG)
-	
+	$(REMOVE) $(BUILDDIR)/*
+	$(REMOVE) $(BINDIR)/*
+	$(REMOVE) $(OBJDIR)/*
 
 
-#####                    EOF                   #####
 

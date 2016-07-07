@@ -118,7 +118,7 @@ int main(void)
 	
 	state_current = STATE_IDLE;
 	
-	uart0_init(1000000);
+	uart0_init(230400);
 	init_spi();
 	init_matrix();
 	init_timers();
